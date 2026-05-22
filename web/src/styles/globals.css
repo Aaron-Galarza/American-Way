@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* En Tailwind v4, en lugar de usar :root tradicional, 
+  usamos @theme para que Tailwind entienda nuestras variables 
+  y nos genere las clases automáticamente (ej: bg-primary, text-secondary)
+*/
+@theme {
+  /* Paleta de Colores */
+  --color-primary: #550E11;
+  --color-secondary: #F9EFBC;
+  --color-background: #121212;
+  --color-foreground: #FFFFFF;
+  --color-border: rgba(255, 255, 255, 0.1);
+
+  /* Tipografías mapeadas desde las variables de Next.js */
+  --font-sans: var(--font-inter), sans-serif;
+  --font-heading: var(--font-spartan), sans-serif;
+
+  /* Variables base */
+  --radius-aw: 16px;
+  --spacing-aw: 16px;
+}
+
+/* @layer base es para aplicar estilos directos a etiquetas HTML 
+  sin tener que ponerles clases todo el tiempo.
+*/
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  /* Hacemos que todos los títulos usen League Spartan por defecto */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+}
