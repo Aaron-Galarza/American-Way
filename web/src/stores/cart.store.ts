@@ -13,6 +13,7 @@ interface CartState {
   deliveryCoordinates: { lat: number; lng: number } | null;
   distanceKm: number;
   deliveryCost: number;
+  pricePerKm: number; // <-- Agregado
 
   addItem: (product: Product, quantity: number, addons: CartAddon[]) => void;
   removeItem: (index: number) => void;
@@ -26,6 +27,7 @@ interface CartState {
 
   setDeliveryAddress: (address: string, coords: { lat: number; lng: number }) => void;
   setDeliveryCost: (cost: number, distanceKm: number) => void;
+  setPricePerKm: (price: number) => void; // <-- Agregado
   clearDelivery: () => void;
 
   getTotals: () => {
@@ -47,6 +49,7 @@ export const useCartStore = create<CartState>()(
       deliveryCoordinates: null,
       distanceKm: 0,
       deliveryCost: 0,
+      pricePerKm: 0, // <-- Agregado (valor inicial)
 
       addItem: (product, quantity, addons) => {
         set((state) => {
@@ -124,6 +127,7 @@ export const useCartStore = create<CartState>()(
       setDeliveryAddress: (address, coords) =>
         set({ deliveryAddress: address, deliveryCoordinates: coords }),
       setDeliveryCost: (cost, distanceKm) => set({ deliveryCost: cost, distanceKm }),
+      setPricePerKm: (price) => set({ pricePerKm: price }), // <-- Agregado (acción)
       clearDelivery: () =>
         set({ deliveryAddress: '', deliveryCoordinates: null, distanceKm: 0, deliveryCost: 0 }),
 

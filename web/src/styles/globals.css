@@ -1,38 +1,38 @@
 @import "tailwindcss";
 
-/* En Tailwind v4, en lugar de usar :root tradicional, 
-  usamos @theme para que Tailwind entienda nuestras variables 
-  y nos genere las clases automáticamente (ej: bg-primary, text-secondary)
-*/
 @theme {
-  /* Paleta de Colores */
-  --color-primary: #550E11;
-  --color-secondary: #F9EFBC;
+  --color-primary: #550e11;
+  --color-secondary: #f9efbc;
   --color-background: #121212;
-  --color-foreground: #FFFFFF;
-  --color-border: rgba(255, 255, 255, 0.1);
-
-  /* Tipografías mapeadas desde las variables de Next.js */
+  --color-foreground: #ffffff;
+  --color-border: rgba(255, 255, 255, 0.12);
   --font-sans: var(--font-inter), sans-serif;
   --font-heading: var(--font-spartan), sans-serif;
-
-  /* Variables base */
   --radius-aw: 16px;
   --spacing-aw: 16px;
 }
 
-/* @layer base es para aplicar estilos directos a etiquetas HTML 
-  sin tener que ponerles clases todo el tiempo.
-*/
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
   body {
-    background-color: var(--color-background);
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 520px at 0% -12%, rgba(85, 14, 17, 0.8) 0%, transparent 58%),
+      radial-gradient(900px 460px at 100% -18%, rgba(249, 239, 188, 0.12) 0%, transparent 65%),
+      var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
 
-  /* Hacemos que todos los títulos usen League Spartan por defecto */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading);
     font-weight: 700;
   }

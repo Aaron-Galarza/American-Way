@@ -4,5 +4,11 @@ export interface SystemConfig {
   baseDeliveryCost: number;
   minOrderAmount: number;
   whatsappNumber: string; // Número a donde se envían las copias de los pedidos
-  noticeMessage?: string; // Un texto de alerta opcional (ej: "Demoras por lluvia")
+  noticeMessage?: string;
+ } 
+
+export interface StoreStatus {
+  isOpen: boolean;
+  message?: string;
+pricePerKm: number
 }

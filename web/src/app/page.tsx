@@ -1,47 +1,51 @@
 'use client';
-import { useState } from 'react';
 
-// Data hardcodeada
-const categories = ['Burgers', 'Sándwiches', 'Ensaladas'];
-const products = [
-  { id: 1, name: 'American Bacon', price: 8500, cat: 'Burgers' },
-  { id: 2, name: 'Lomo Completo', price: 9200, cat: 'Sándwiches' },
-  { id: 3, name: 'Caesar Salad', price: 6000, cat: 'Ensaladas' },
-];
+import { useMenu } from '@/features/menu/hooks/useMenu';
+import { useStoreStatus } from '@/features/menu/hooks/useStoreStatus';
+import { StoreClosed } from '@/features/menu/components/StoreClosed';
+import { FeaturedBanner } from '@/features/menu/components/FeaturedBanner';
+import { SearchBar } from '@/features/menu/components/SearchBar';
+import { CategoryFilter } from '@/features/menu/components/CategoryFilter';
+import { ProductList } from '@/features/menu/components/ProductList';
 
 export default function HomePage() {
-  const [activeCat, setActiveCat] = useState('Burgers');
-  const filtered = products.filter(p => p.cat === activeCat);
+  const { isOpen, message, loading: statusLoading } = useStoreStatus();
+  const {
+    products,
+    categories,
+    loading: menuLoading,
+    error: menuError,
+    selectedCategory,
+    searchQuery,
+    filteredProducts,
+    selectCategory,
+    setSearch,
+  } = useMenu();
 
   return (
-    <main className="max-w-5xl mx-auto p-4 pt-6">
-      {/* Categorías */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {categories.map(c => (
-          <button 
-            key={c}
-            onClick={() => setActiveCat(c)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeCat === c ? 'bg-primary text-white' : 'bg-white/5'}`}
-          >
-            {c}
-          </button>
-        ))}
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pb-8 pt-5 sm:px-5">
+      {!statusLoading && !isOpen && <StoreClosed message={message} />}
+
+      {!menuLoading && !menuError && <FeaturedBanner products={products} isStoreOpen={isOpen} />}
+
+      <div className="sticky top-16 z-30 mt-4 space-y-3 rounded-2xl border border-white/10 bg-background/85 p-3 backdrop-blur-xl">
+        <SearchBar searchQuery={searchQuery} onSearch={setSearch} />
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={selectCategory}
+        />
       </div>
 
-      {/* Grid de Productos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map(p => (
-          <div key={p.id} className="bg-white/5 p-4 rounded-xl flex justify-between items-center border border-white/10 hover:border-secondary/50 transition-colors">
-            <div>
-              <h3 className="font-bold">{p.name}</h3>
-              <p className="text-sm text-white/60">${p.price}</p>
-            </div>
-            <button className="bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg text-sm font-bold transition-all active:scale-95">
-              Agregar
-            </button>
-          </div>
-        ))}
-      </div>
+      <section id="product-list-top" className="mt-6">
+        <ProductList
+          products={filteredProducts}
+          loading={menuLoading}
+          error={menuError}
+          isStoreOpen={isOpen}
+          onRetry={() => window.location.reload()}
+        />
+      </section>
     </main>
   );
 }

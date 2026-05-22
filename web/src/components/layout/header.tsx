@@ -1,51 +1,46 @@
 'use client';
+
 import { Menu, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function Header() {
   const router = useRouter();
-  
-  // Por ahora hardcodeamos el count en 0 hasta que hagamos el Store de Zustand
-  const cartCount = 0; 
+  const cartCount = 0;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-secondary/20 bg-primary/95 backdrop-blur-md shadow-xl">
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        
-        {/* Botón Menú */}
+    <header className="sticky top-0 z-50 w-full border-b border-secondary/20 bg-primary/88 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
         <button
-          onClick={() => console.log('Abrir menú')}
-          className="p-2 -ml-2 text-secondary hover:bg-white/10 rounded-full transition-all active:scale-90"
-          aria-label="Abrir menú"
+          onClick={() => console.log('Abrir menu')}
+          className="rounded-full border border-secondary/30 bg-white/5 p-2 text-secondary transition-all hover:bg-white/10 active:scale-95"
+          aria-label="Abrir menu"
         >
-          <Menu size={26} strokeWidth={2.5} />
+          <Menu size={22} strokeWidth={2.4} />
         </button>
 
-        {/* Branding: Logo + Nombre (Ahora actúa como botón al Inicio) */}
-        <button 
+        <button
           onClick={() => router.push('/')}
-          className="flex-1 flex items-center justify-center gap-2 hover:opacity-80 transition-opacity active:scale-95"
+          className="group flex flex-1 items-center justify-center gap-2 px-2 transition-opacity hover:opacity-90"
           aria-label="Ir al inicio"
         >
           <img
             src="https://res.cloudinary.com/dojwvsefr/image/upload/v1779155504/LOGO-AW_1_s3k9qd.png"
             alt="American Way"
-            className="h-8 object-contain"
+            className="h-8 object-contain transition-transform duration-500 group-hover:scale-105"
           />
-          <span className="font-heading text-lg font-bold tracking-wide text-secondary uppercase hidden md:block">
+          <span className="hidden font-heading text-lg font-bold uppercase tracking-wider text-secondary md:block">
             American Way
           </span>
         </button>
 
-        {/* Botón Carrito */}
         <button
           onClick={() => router.push('/cart')}
-          className="p-2 -mr-2 text-secondary hover:bg-white/10 rounded-full transition-all relative active:scale-90"
+          className="relative rounded-full border border-secondary/30 bg-white/5 p-2 text-secondary transition-all hover:bg-white/10 active:scale-95"
           aria-label="Abrir carrito"
         >
-          <ShoppingCart size={24} strokeWidth={2.5} />
+          <ShoppingCart size={22} strokeWidth={2.4} />
           {cartCount > 0 && (
-            <span className="absolute top-1 right-0 min-w-[20px] h-[20px] bg-secondary text-primary rounded-full flex items-center justify-center text-[10px] font-black shadow-sm border border-primary animate-in zoom-in duration-300">
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border border-primary bg-secondary px-1 text-[10px] font-black text-primary">
               {cartCount}
             </span>
           )}
