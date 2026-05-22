@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose'
 export interface iUser extends Document {
   email: string
   passwordHash: string
+  role: 'admin'
 }
 
 const UserSchema = new Schema<iUser>({
@@ -16,6 +17,11 @@ const UserSchema = new Schema<iUser>({
   passwordHash: {
     type: String,
     required: true
+  },
+  role: {
+    type: String,
+    enum: ['admin'],
+    default: 'admin'
   }
 }, { timestamps: true })
 

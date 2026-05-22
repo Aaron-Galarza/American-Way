@@ -1,10 +1,16 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
-export const createAdicionalSchema = z.object({
-  title:    z.string().min(1, 'El título del adicional es obligatorio'),
-  price:    z.number({ message: 'El precio debe ser un número' })
-              .min(0, 'El precio no puede ser negativo'),
-  category: z.string().min(1, 'La categoría del adicional es obligatoria')
-})
+const adicionalBaseSchema = z.object({
+  name: z.string().min(1, 'El nombre del adicional es obligatorio').optional(),
+  title: z.string().min(1, 'El titulo del adicional es obligatorio').optional(),
+  price: z.number({ message: 'El precio debe ser un numero' }).min(0, 'El precio no puede ser negativo'),
+  category: z.string().min(1, 'La categoria del adicional es obligatoria').optional(),
+  active: z.boolean().optional(),
+});
 
-export const updateAdicionalSchema = createAdicionalSchema.partial()
+export const createAdicionalSchema = adicionalBaseSchema.refine((data) => data.name || data.title, {
+  message: 'El nombre del adicional es obligatorio',
+  path: ['name'],
+});
+
+export const updateAdicionalSchema = adicionalBaseSchema.partial();

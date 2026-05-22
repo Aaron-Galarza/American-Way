@@ -8,10 +8,11 @@ import { errorHandler } from './middlewares/error.middleware';
 const app: Application = express();
 
 const allowedOrigins = [
+    process.env.CLIENT_URL,
     'https://un-toque-ahumado.vercel.app',
     'http://localhost:3000',
     'https://un-toque-ahumado-c1gwleu4y-aaron-galarzas-projects.vercel.app'
-]
+].filter(Boolean)
 
 app.use(helmet())
 app.use(cors({

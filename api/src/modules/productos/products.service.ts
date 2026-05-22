@@ -1,46 +1,115 @@
-import { iProducto, ProductModel } from './products.model'; 
+import mongoose from 'mongoose';
+import { iProducto, ProductModel } from './products.model';
+import { CategoriaModel } from '../categorias/categorias.model';
 
-// Servicio para obtener todos los productos (admin)
-export const viewAll = async (): Promise<iProducto[]> => {
-  return await ProductModel.find().populate('category', 'name active')
+const isObjectId = (value: unknown): value is mongoose.Types.ObjectId | string =>
+  typeof value === 'string'
+    ? mongoose.Types.ObjectId.isValid(value)
+    : value instanceof mongoose.Types.ObjectId;
+
+const attachCategories = async (products: any[]) => {
+  const categoryIds = products
+    .map((product) => product.category)
+    .filter(isObjectId)
+    .map((category) => category.toString());
+
+  const categories = await CategoriaModel.find({ _id: { $in: categoryIds } })
+    .select('name active order')
+    .lean();
+
+  const categoryMap = new Map(categories.map((category) => [category._id.toString(), category]));
+
+  return products.map((product) => {
+    const rawCategory = product.category;
+    const category =
+      isObjectId(rawCategory)
+        ? categoryMap.get(rawCategory.toString()) ?? rawCategory
+        : {
+            _id: null,
+            name: rawCategory,
+            active: true,
+            order: 0,
+          };
+
+    return {
+      ...product,
+      category,
+    };
+  });
 };
 
-// Servicio para obtener todos los productos ACTIVOS (publico)
+const sortMenuProducts = (products: any[]) =>
+  products.sort((a: any, b: any) => {
+    const categoryOrderA = a.category?.order ?? 0;
+    const categoryOrderB = b.category?.order ?? 0;
+    if (categoryOrderA !== categoryOrderB) return categoryOrderA - categoryOrderB;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
+
+export const viewAll = async (): Promise<iProducto[]> => {
+  const products = await ProductModel.find()
+    .select('title description price image category available active featured order createdAt updatedAt')
+    .lean();
+
+  return await attachCategories(products) as iProducto[];
+};
+
 export const viewActive = async (): Promise<iProducto[]> => {
-  return await ProductModel.find({ active: true }).populate('category', 'name active')
-}
+  const products = await ProductModel.find({
+    $and: [
+      { active: true },
+      { available: { $ne: false } },
+    ],
+  })
+    .select('title description price image category available active featured order')
+    .lean();
 
-// Servicio para obtener un producto por ID
+  const withCategories = await attachCategories(products);
+  return sortMenuProducts(withCategories) as iProducto[];
+};
+
 export const viewById = async (id: string): Promise<iProducto | null> => {
-  return await ProductModel.findById(id).populate('category', 'name active')
-}
+  return await ProductModel.findById(id);
+};
 
-// Servicio para crear un nuevo producto (ADMIN)
 export const create = async (data: Partial<iProducto>): Promise<iProducto> => {
-  const newProduct = new ProductModel(data)
-  return await newProduct.save()
-}
+  const newProduct = new ProductModel({
+    ...data,
+    available: data.available ?? data.active ?? true,
+    active: data.active ?? data.available ?? true,
+  });
+  return await newProduct.save();
+};
 
-// Servicio para Actualizar un producto (ADMIN)
 export const modify = async (id: string, data: Partial<iProducto>): Promise<iProducto | null> => {
-  return await ProductModel.findByIdAndUpdate(id,
-    { $set: data },
-    { new: true, runValidators: true }
-  ).populate('category', 'name active')
-}
+  const updateData = {
+    ...data,
+    ...(data.available !== undefined && data.active === undefined ? { active: data.available } : {}),
+    ...(data.active !== undefined && data.available === undefined ? { available: data.active } : {}),
+  };
 
-// Servicio para Activar/Desactivar un Producto
+  return await ProductModel.findByIdAndUpdate(
+    id,
+    { $set: updateData },
+    { new: true, runValidators: true },
+  );
+};
+
 export const toggleActive = async (id: string): Promise<iProducto | null> => {
-  const product = await ProductModel.findById(id)
+  const product = await ProductModel.findById(id);
 
-  if (!product) return null
+  if (!product) return null;
 
-  product.active = !product.active 
-  return await product.save()
-}
+  const nextStatus = !product.active;
+  product.active = nextStatus;
+  product.available = nextStatus;
+  return await product.save();
+};
 
-// Servicio para eliminar un producto permanentemente
 export const deleteById = async (id: string): Promise<iProducto | null> => {
-  const results = ProductModel.findByIdAndDelete(id)
-  return await results
-}
+  return await ProductModel.findByIdAndUpdate(
+    id,
+    { active: false, available: false },
+    { new: true },
+  );
+};

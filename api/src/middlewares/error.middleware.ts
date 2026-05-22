@@ -25,6 +25,15 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     return sendError(res, message, 400)
   }
 
+  if (
+    err.name === 'MongoNetworkError' ||
+    err.name === 'MongooseServerSelectionError' ||
+    err.name === 'MongoServerSelectionError'
+  ) {
+    console.error(`[DB_ERROR] ${req.method} ${req.url} - ${err.message}`)
+    return sendError(res, 'Servicio temporalmente no disponible', 503)
+  }
+
   // JWT
   if (err.name === 'JsonWebTokenError') {
     return sendError(res, 'Token inválido', 401)

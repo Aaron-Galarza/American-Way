@@ -1,32 +1,46 @@
-import mongoose, { Schema, Document } from 'mongoose'
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface iAdicional extends Document {
-  title: string
-  price: number
-  category: string
-  active: boolean
+  name?: string;
+  title?: string;
+  price: number;
+  category?: string;
+  active: boolean;
 }
 
 const AdicionalSchema = new Schema<iAdicional>({
+  name: {
+    type: String,
+    trim: true,
+  },
   title: {
     type: String,
-    required: [true, 'El título es obligatorio'],
-    trim: true
+    trim: true,
   },
   price: {
     type: Number,
     required: [true, 'El precio es obligatorio'],
-    min: 0
+    min: 0,
   },
   category: {
     type: String,
-    required: [true, 'La categoría es obligatoria'],
-    index: true
+    default: 'general',
+    index: true,
   },
   active: {
     type: Boolean,
-    default: true
-  }
-}, { timestamps: true })
+    default: true,
+    index: true,
+  },
+}, { timestamps: true });
 
-export const AdicionalModel = mongoose.model<iAdicional>('Adicional', AdicionalSchema)
+AdicionalSchema.pre('validate', function () {
+  if (!this.name && this.title) this.name = this.title;
+  if (!this.title && this.name) this.title = this.name;
+
+  if (!this.name && !this.title) {
+    this.invalidate('name', 'El nombre del adicional es obligatorio');
+  }
+});
+
+export const AdicionalModel = mongoose.model<iAdicional>('Adicional', AdicionalSchema);

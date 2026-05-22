@@ -4,6 +4,8 @@ import * as ProductService from '../productos/products.service'
 import * as AdicionalService from '../adicionales/adicionales.service'
 import { updateAnalyticsOnDelivery, revertAnalyticsOnDelivery } from '../analytics/analytics.service'
 import { checkStoreStatus } from '../Schedules/Schedule.service'
+import { calculateDelivery } from '../delivery/delivery.service'
+import { AppError } from '../../utils/AppError'
 import { argDate, argToUTC } from '../../utils/Timezone'
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
@@ -25,9 +27,11 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
           item.addons.map(async (a: any) => {
             const adicional = await AdicionalService.viewById(a.addonId)
             if (!adicional) throw new Error(`Adicional ${a.addonId} no encontrado`)
+            const addonName = adicional.name ?? adicional.title ?? 'Adicional'
             return {
               addonId:  a.addonId,
-              title:    adicional.title,
+              title:    addonName,
+              name:     addonName,
               price:    adicional.price,
               quantity: a.quantity
             }
@@ -52,11 +56,32 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
   }, 0)
  
   let total = subTotal
+  let discountPercent = 0
   if (orderData.couponCode) {
     const coupon = await CouponService.search(orderData.couponCode)
     if (!coupon) throw new Error('El cupon ingresado no es valido')
-    const discount = (subTotal * coupon.Percent) / 100
+    discountPercent = coupon.Percent
+    const discount = (subTotal * discountPercent) / 100
     total = subTotal - discount
+  }
+
+  let deliveryCost = 0
+  let delivery = orderData.delivery
+
+  if (orderData.deliveryType === 'delivery') {
+    const coordinates = orderData.delivery?.coordinates
+    if (typeof coordinates?.lat !== 'number' || typeof coordinates?.lng !== 'number') {
+      throw new AppError(400, 'Las coordenadas son obligatorias para envios')
+    }
+
+    const deliveryCalculation = await calculateDelivery(coordinates.lat, coordinates.lng)
+    deliveryCost = deliveryCalculation.deliveryCost
+    delivery = {
+      address: orderData.delivery?.address ?? orderData.customer?.address,
+      coordinates,
+      distanceKm: deliveryCalculation.distanceKm
+    }
+    total += deliveryCost
   }
  
   const newOrder = new OrderModel({
@@ -65,6 +90,10 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
     deliveryType:  orderData.deliveryType,
     paymentMethod: orderData.paymentMethod,
     couponCode:    orderData.couponCode,
+    discountPercent,
+    subtotal:      subTotal,
+    deliveryCost,
+    delivery,
     total:         Math.max(0, total)
   })
  

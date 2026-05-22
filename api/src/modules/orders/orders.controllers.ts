@@ -3,6 +3,7 @@ import * as OrderService from './orders.service'
 import { sendError, sendSucces } from '../../utils/response'
 import { validOrderStatus, OrderStatus } from './orders.model'
 import { getIO } from '../../socket/socket'
+import { AppError } from '../../utils/AppError'
 
 const VALID_RANGES = ['hoy', 'ayer', 'semana', 'mes'] as const;
 type Range = (typeof VALID_RANGES)[number];
@@ -13,6 +14,11 @@ export const createOrder = async (req: Request, res: Response) => {
     getIO().to('admins').emit('new-order', order)
     return sendSucces(res, order, 201)
   } catch (error: any) {
+    if (error instanceof AppError) {
+      const message = error.statusCode === 503 ? 'No pudimos calcular el envio en este momento' : error.message
+      return sendError(res, message, error.statusCode)
+    }
+
     const esErrorDeNegocio = error?.message && !error.message.includes('Cannot')
     if (esErrorDeNegocio) return sendError(res, error.message, 400)
     console.error(`[ERROR] createOrder - ${error?.message}`)
