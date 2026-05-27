@@ -23,12 +23,12 @@ export default function HomePage() {
   } = useMenu();
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pb-8 pt-5 sm:px-5">
+    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-3 pb-10 pt-5 sm:px-6 sm:pt-6 lg:px-8">
       {!statusLoading && !isOpen && <StoreClosed message={message} />}
 
       {!menuLoading && !menuError && <FeaturedBanner products={products} isStoreOpen={isOpen} />}
 
-      <div className="sticky top-16 z-30 mt-4 space-y-3 rounded-2xl border border-white/10 bg-background/85 p-3 backdrop-blur-xl">
+      <div className="sticky top-16 z-30 mt-4 space-y-2.5 rounded-3xl border border-white/10 bg-background/90 p-3 shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:mt-5 sm:p-4">
         <SearchBar searchQuery={searchQuery} onSearch={setSearch} />
         <CategoryFilter
           categories={categories}
@@ -37,12 +37,13 @@ export default function HomePage() {
         />
       </div>
 
-      <section id="product-list-top" className="mt-6">
+      <section id="product-list-top" className="mt-6 sm:mt-7">
         <ProductList
           products={filteredProducts}
           loading={menuLoading}
           error={menuError}
           isStoreOpen={isOpen}
+          categories={categories}
           onRetry={() => window.location.reload()}
         />
       </section>

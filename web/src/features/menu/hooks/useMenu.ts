@@ -26,6 +26,13 @@ export const useMenu = () => {
 
         setProducts(productsData);
         setCategories(categoriesData);
+
+        // 👇 MAGIA ACÁ: Auto-seleccionamos la primera categoría al cargar
+        // Si hay categorías disponibles, clavamos la primera por defecto.
+        if (categoriesData.length > 0) {
+          setSelectedCategory(categoriesData[0].id);
+        }
+
         setError(null);
       } catch (err) {
         console.error('Error cargando el menú:', err);
@@ -61,7 +68,17 @@ export const useMenu = () => {
 
   const setSearch = (query: string) => {
     setSearchQuery(query);
-    if (query) setSelectedCategory(null); // Si busca tipeando, limpia la categoría
+    
+    if (query) {
+      // Si busca tipeando, ponemos la categoría en null para buscar en TODO el menú
+      setSelectedCategory(null); 
+    } else {
+      // 👇 Si borra el texto de la lupa, lo devolvemos a la primera categoría 
+      // en vez de mostrarle "Todos" los productos mezclados.
+      if (categories.length > 0) {
+        setSelectedCategory(categories[0].id);
+      }
+    }
   };
 
   return {

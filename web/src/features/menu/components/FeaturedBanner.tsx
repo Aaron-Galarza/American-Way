@@ -1,19 +1,15 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Image from 'next/image';
 import {
-  ChevronLeft,
-  ChevronRight,
   Flame,
-  Image as ImageIcon,
+  MessageCircle,
   Plus,
   ShoppingBag,
-  Star,
 } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
-import { formatPrice } from '@/lib/format';
 import type { Product } from '@/types';
+import { FeaturedBannerVisual } from './FeaturedBannerVisual';
 
 interface FeaturedBannerProps {
   products: Product[];
@@ -67,31 +63,31 @@ export const FeaturedBanner = ({ products, isStoreOpen }: FeaturedBannerProps) =
   };
 
   return (
-    <section className="mb-6 animate-in rounded-3xl border border-secondary/20 bg-gradient-to-br from-[#1a0f10] via-primary/80 to-[#171717] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.35)] fade-in duration-500 sm:p-7">
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-        <div className="space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-secondary">
+    <section className="mb-7 animate-in rounded-3xl border border-white/10 bg-primary/70 p-5 shadow-[0_24px_52px_rgba(0,0,0,0.42)] fade-in duration-500 sm:p-8">
+      <div className="grid gap-7 lg:grid-cols-[1.08fr_1fr] lg:items-center">
+        <div className="space-y-5">
+          <span className="inline-flex items-center gap-2 rounded-full border border-secondary/35 bg-secondary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-secondary">
             <Flame className="h-3.5 w-3.5" />
             Hot & Fast Delivery
           </span>
 
-          <h2 className="max-w-[14ch] font-heading text-4xl font-bold leading-[1.05] text-white sm:text-5xl">
+          <h2 className="max-w-[14ch] font-heading text-4xl font-bold leading-[1.03] text-white sm:text-5xl">
             Autenticas Artesanales directo a tu puerta.
           </h2>
 
-          <p className="max-w-xl text-base leading-relaxed text-white/80">
+          <p className="max-w-xl text-base leading-relaxed text-white/70">
             {currentProduct.description}. Preparado al momento, con ingredientes frescos y despacho
             rapido para que llegue en su punto.
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={handleAddClick}
               disabled={isButtonDisabled}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold transition-all ${
+              className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold transition-all duration-300 active:scale-95 ${
                 isButtonDisabled
                   ? 'cursor-not-allowed border border-white/15 bg-white/10 text-white/50'
-                  : 'bg-secondary text-primary shadow-lg hover:bg-secondary/90 active:scale-95'
+                  : 'bg-secondary text-primary shadow-[0_6px_16px_rgba(249,239,188,0.18)] hover:bg-secondary/90'
               }`}
             >
               <Plus className="h-4 w-4" />
@@ -100,87 +96,62 @@ export const FeaturedBanner = ({ products, isStoreOpen }: FeaturedBannerProps) =
 
             <button
               onClick={scrollToMenu}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition-all hover:border-secondary/40 hover:text-secondary"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-black/25 px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:border-white/30 hover:bg-black/35 active:scale-95"
             >
               <ShoppingBag className="h-4 w-4" />
               Ver Menu
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-5 border-t border-white/10 pt-4 text-sm text-secondary/90">
+          <div className="flex flex-wrap items-center gap-5 border-t border-white/10 pt-4 text-sm text-white/60">
             <span>35-50 min</span>
             <span>Efectivo / MPago</span>
             <span>Delivery & Take Away</span>
+            <a
+              href="https://www.instagram.com/americanway"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white/65 transition-all hover:border-secondary/35 hover:text-secondary active:scale-95"
+              aria-label="Instagram American Way"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.2" />
+                <circle cx="12" cy="12" r="4.1" />
+                <circle cx="17.25" cy="6.75" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a
+              href="https://wa.me/5491123456789"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white/65 transition-all hover:border-secondary/35 hover:text-secondary active:scale-95"
+              aria-label="WhatsApp American Way"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </a>
           </div>
         </div>
 
-        <div className="relative">
-          <article className="relative h-[320px] overflow-hidden rounded-3xl border border-secondary/25 bg-black/30 sm:h-[360px]">
-            {!hasImageError && currentProduct.image ? (
-              <>
-                <Image
-                  src={currentProduct.image}
-                  alt={currentProduct.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 42vw"
-                  className="object-cover"
-                  onError={() => handleImageError(currentProduct.id)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-              </>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-primary/45 text-secondary/35">
-                <ImageIcon className="h-12 w-12" />
-              </div>
-            )}
-
-            <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-secondary/55 bg-secondary/90 px-2.5 py-1 text-xs font-bold text-primary">
-              <Star className="h-3.5 w-3.5 fill-current" />
-              La mas nueva
-            </div>
-
-            <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between p-4">
-              <div>
-                <h3 className="font-heading text-2xl font-bold text-white">{currentProduct.title}</h3>
-                <p className="text-lg font-black text-secondary">{formatPrice(currentProduct.price)}</p>
-              </div>
-            </div>
-          </article>
-
-          {canNavigate && (
-            <>
-              <button
-                onClick={handlePrev}
-                className="absolute -left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-secondary/35 bg-primary/90 text-secondary transition-all hover:bg-primary"
-                aria-label="Producto anterior"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="absolute -right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-secondary/35 bg-primary/90 text-secondary transition-all hover:bg-primary"
-                aria-label="Producto siguiente"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </>
-          )}
-
-          {canNavigate && (
-            <div className="mt-3 flex items-center justify-center gap-2">
-              {featuredProducts.map((product, index) => (
-                <button
-                  key={product.id}
-                  onClick={() => setCurrentIndex(index)}
-                  aria-label={`Ir al destacado ${index + 1}`}
-                  className={`h-2.5 rounded-full transition-all ${
-                    index === safeIndex ? 'w-6 bg-secondary' : 'w-2.5 bg-white/35 hover:bg-white/55'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <FeaturedBannerVisual
+          currentProduct={currentProduct}
+          hasImageError={hasImageError}
+          onImageError={handleImageError}
+          canNavigate={canNavigate}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          featuredProducts={featuredProducts}
+          safeIndex={safeIndex}
+          onSelect={setCurrentIndex}
+        />
       </div>
     </section>
   );
