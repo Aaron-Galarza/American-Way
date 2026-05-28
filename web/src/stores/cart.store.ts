@@ -2,7 +2,8 @@
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { Product, CartItem, CartAddon, Coupon } from '@/types';
+// 👇 1. Importamos Addon acá
+import { Product, CartItem, CartAddon, Coupon, Addon } from '@/types'; 
 
 interface CartState {
   items: CartItem[];
@@ -13,11 +14,13 @@ interface CartState {
   deliveryCoordinates: { lat: number; lng: number } | null;
   distanceKm: number;
   deliveryCost: number;
-  pricePerKm: number; // <-- Agregado
+  pricePerKm: number;
 
   addItem: (product: Product, quantity: number, addons: CartAddon[]) => void;
   removeItem: (index: number) => void;
   updateQuantity: (index: number, quantity: number) => void;
+  // 👇 2. Agregamos la firma de la nueva acción
+  updateItemAddon: (itemIndex: number, addon: Addon, delta: number) => void; 
   clearCart: () => void;
 
   setDeliveryType: (type: 'pickup' | 'delivery') => void;
@@ -27,7 +30,7 @@ interface CartState {
 
   setDeliveryAddress: (address: string, coords: { lat: number; lng: number }) => void;
   setDeliveryCost: (cost: number, distanceKm: number) => void;
-  setPricePerKm: (price: number) => void; // <-- Agregado
+  setPricePerKm: (price: number) => void;
   clearDelivery: () => void;
 
   getTotals: () => {
@@ -49,7 +52,7 @@ export const useCartStore = create<CartState>()(
       deliveryCoordinates: null,
       distanceKm: 0,
       deliveryCost: 0,
-      pricePerKm: 0, // <-- Agregado (valor inicial)
+      pricePerKm: 0,
 
       addItem: (product, quantity, addons) => {
         set((state) => {
@@ -118,6 +121,42 @@ export const useCartStore = create<CartState>()(
         });
       },
 
+      // 👇 3. LA NUEVA LÓGICA DE EXTRAS
+      updateItemAddon: (itemIndex, addon, delta) => {
+        set((state) => {
+          const newItems = [...state.items];
+          const item = newItems[itemIndex];
+          if (!item) return state;
+
+          const existingAddonIndex = item.addons.findIndex(a => a.addon.id === addon.id);
+          let newAddons = [...item.addons];
+
+          if (existingAddonIndex >= 0) {
+            const newQty = newAddons[existingAddonIndex].quantity + delta;
+            if (newQty <= 0) {
+              newAddons.splice(existingAddonIndex, 1); // Lo borramos si llega a 0
+            } else {
+              newAddons[existingAddonIndex] = { ...newAddons[existingAddonIndex], quantity: newQty };
+            }
+          } else if (delta > 0) {
+            // Lo agregamos si no existía y apretó el "+"
+            newAddons.push({ addon, quantity: delta });
+          }
+
+          // Recalculamos la plata con los nuevos extras para que coincida todo
+          const newAddonsTotal = newAddons.reduce((sum, a) => sum + a.addon.price * a.quantity, 0);
+          const unitPrice = item.product.price + newAddonsTotal;
+
+          newItems[itemIndex] = { 
+            ...item, 
+            addons: newAddons,
+            itemTotal: item.quantity * unitPrice // Actualizamos el total de la fila
+          };
+          
+          return { items: newItems };
+        });
+      },
+
       clearCart: () => set({ items: [], coupon: null }),
 
       setDeliveryType: (type) => set({ deliveryType: type }),
@@ -127,7 +166,7 @@ export const useCartStore = create<CartState>()(
       setDeliveryAddress: (address, coords) =>
         set({ deliveryAddress: address, deliveryCoordinates: coords }),
       setDeliveryCost: (cost, distanceKm) => set({ deliveryCost: cost, distanceKm }),
-      setPricePerKm: (price) => set({ pricePerKm: price }), // <-- Agregado (acción)
+      setPricePerKm: (price) => set({ pricePerKm: price }),
       clearDelivery: () =>
         set({ deliveryAddress: '', deliveryCoordinates: null, distanceKm: 0, deliveryCost: 0 }),
 

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Plus, Image as ImageIcon, Star } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
 import { formatPrice } from '@/lib/format';
-import { AddonsModal } from './AddonsModal';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
@@ -18,17 +17,16 @@ interface ProductCardProps {
 export const ProductCard = ({ product, isStoreOpen, hasAddons = false, priority = false }: ProductCardProps) => {
   const addItem = useCartStore((state) => state.addItem);
   const [imageError, setImageError] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAddClick = () => {
-    if (hasAddons) {
-      setIsModalOpen(true);
-      return;
-    }
     addItem(product, 1, []);
   };
 
   const isButtonDisabled = !isStoreOpen || !product.available;
+
+  // 👇 EL PATOVICA: Verificamos que sea un string y que parezca una URL o ruta válida
+  const isValidImage = typeof product.image === 'string' && 
+    (product.image.startsWith('http') || product.image.startsWith('/'));
 
   return (
     <>
@@ -40,9 +38,9 @@ export const ProductCard = ({ product, isStoreOpen, hasAddons = false, priority 
           </div>
         )}
 
-        {/* 👇 1. Cambiamos 'aspect-[4/3]' por 'aspect-[16/9]' (más apaisado/corto) */}
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-primary/25">
-          {!imageError && product.image ? (
+          {/* 👇 Usamos nuestra validación acá */}
+          {!imageError && isValidImage ? (
             <>
               <Image
                 src={product.image}
@@ -63,21 +61,17 @@ export const ProductCard = ({ product, isStoreOpen, hasAddons = false, priority 
           )}
         </div>
 
-        {/* 👇 2. Redujimos el padding general de 'p-5' a 'p-4' */}
         <div className="flex flex-1 flex-col p-4">
           <h3 className="font-heading text-lg font-bold leading-tight text-white">{product.title}</h3>
-          {/* 👇 Truncamos la descripción a 1 sola línea o achicamos margen */}
-         <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-white/65">{product.description}</p>
+          <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-white/65">{product.description}</p>
           
           <div className="flex-1" />
 
-          {/* 👇 3. Redujimos márgenes arriba del precio (mt-3 pt-3 en vez de mt-5 pt-4) */}
           <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
             <strong className="text-xl font-black text-secondary">{formatPrice(product.price)}</strong>
             <button
               onClick={handleAddClick}
               disabled={isButtonDisabled}
-              // Achicamos un poco el padding del botón para ganar espacio
               className={`flex items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-bold transition-all duration-300 active:scale-95 ${
                 isButtonDisabled
                   ? 'cursor-not-allowed border border-white/20 bg-white/10 text-white/50'
@@ -91,12 +85,6 @@ export const ProductCard = ({ product, isStoreOpen, hasAddons = false, priority 
         </div>
       </article>
 
-      <AddonsModal 
-        product={product} 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        availableAddons={product.addons || []} 
-      />
     </>
   );
 };
