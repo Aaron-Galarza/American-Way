@@ -6,10 +6,7 @@ export interface iProducto extends Document {
   description?: string;
   image?: string;
   category: mongoose.Types.ObjectId;
-  available: boolean;
   active: boolean;
-  featured: boolean;
-  order: number;
 }
 
 const ProductoSchema = new Schema<iProducto>({
@@ -35,22 +32,9 @@ const ProductoSchema = new Schema<iProducto>({
   image: {
     type: String,
   },
-  available: {
-    type: Boolean,
-    default: true,
-    index: true,
-  },
   active: {
     type: Boolean,
     default: true,
-  },
-  featured: {
-    type: Boolean,
-    default: false,
-  },
-  order: {
-    type: Number,
-    default: 0,
     index: true,
   },
 }, {

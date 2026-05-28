@@ -10,12 +10,14 @@ const couponBaseSchema = z.object({
   validPaymentMethods: z.array(z.enum(['cash', 'transfer', 'mercadopago', 'Efectivo', 'Transferencia'])).optional(),
 });
 
-export const createCouponSchema = couponBaseSchema.refine((data) => data.code || data.Code, {
-  message: 'El codigo del cupon es obligatorio',
-  path: ['code'],
-}).refine((data) => data.discountPercent || data.Percent, {
-  message: 'El porcentaje es obligatorio',
-  path: ['discountPercent'],
-});
+export const createCouponSchema = couponBaseSchema
+  .refine((data) => data.code || data.Code, {
+    message: 'El codigo del cupon es obligatorio',
+    path: ['code'],
+  })
+  .refine((data) => data.discountPercent !== undefined || data.Percent !== undefined, {
+    message: 'El porcentaje es obligatorio',
+    path: ['discountPercent'],
+  });
 
 export const updateCouponSchema = couponBaseSchema.partial();

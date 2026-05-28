@@ -42,6 +42,10 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     return sendError(res, 'Token expirado', 401)
   }
 
+  if (err instanceof SyntaxError && 'body' in err) {
+    return sendError(res, 'JSON inválido en el body de la petición', 400)
+  }
+
   console.error(`[ERROR] ${req.method} ${req.url} - ${err.message}`)
   return sendError(res, 'Error interno del servidor', 500)
 }

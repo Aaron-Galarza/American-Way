@@ -6,10 +6,7 @@ export const createProductSchema = z.object({
   description: z.string().min(1, 'La descripcion es obligatoria'),
   category: z.string().regex(/^[a-f\d]{24}$/i, 'ID de categoria invalido'),
   image: z.string().optional(),
-  available: z.boolean().optional(),
   active: z.boolean().optional(),
-  featured: z.boolean().optional(),
-  order: z.number().optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial();

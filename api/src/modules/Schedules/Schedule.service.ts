@@ -1,7 +1,7 @@
 import { ConfigModel, IDaySchedule, IConfig } from './Schedule.module';
 
 const normalizeDayName = (value?: string) =>
-  value?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  value?.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 export const checkStoreStatus = async () => {
   const config = await ConfigModel.getOrCreateConfig();
@@ -10,7 +10,6 @@ export const checkStoreStatus = async () => {
   if (isEmergencyClosed) {
     return {
       isOpen: false,
-      isClose: true,
       isEmergencyClosed: true,
       message: config.emergencyMessage || 'Negocio cerrado',
       schedule: null,
@@ -40,7 +39,6 @@ export const checkStoreStatus = async () => {
   if (!todaySchedule || !todaySchedule.isStoreOpen) {
     return {
       isOpen: false,
-      isClose: true,
       isEmergencyClosed: false,
       message: 'Hoy el local permanece cerrado',
       schedule: todaySchedule ?? null,
@@ -52,7 +50,6 @@ export const checkStoreStatus = async () => {
 
   return {
     isOpen,
-    isClose: !isOpen,
     isEmergencyClosed: false,
     message: isOpen ? 'Estamos cocinando!' : `Abrimos a las ${todaySchedule.openTime}`,
     schedule: todaySchedule,

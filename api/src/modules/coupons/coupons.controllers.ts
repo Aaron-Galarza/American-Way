@@ -22,7 +22,7 @@ const getCurrentDay = () => {
   return dayMap[normalized] ?? normalized
 }
 
-export const getAllCoupons = async (req: Request, res: Response) => {
+export const getAllCoupons = async (_req: Request, res: Response) => {
   try {
     const coupons = await CouponsService.viewAll()
     return sendSucces(res, coupons, 200)
@@ -44,7 +44,7 @@ export const createNewCoupon = async (req: Request, res: Response) => {
 export const validateCoupon = async (req: Request, res: Response) => {
   try {
     const { code } = req.params
-    const { paymentMethod } = req.body
+    const paymentMethod = req.body?.paymentMethod
     const result = await CouponsService.search(code as string)
     if (!result) return sendError(res, 'Cupon no valido, inexistente o expirado', 400)
 

@@ -5,7 +5,10 @@ export const viewAll = async (): Promise<iCategoria[]> => {
 };
 
 export const viewActive = async (): Promise<iCategoria[]> => {
-  return await CategoriaModel.find({ active: true }).sort({ order: 1, name: 1 }).lean();
+  return await CategoriaModel.find({ active: true })
+    .select('_id name order active')
+    .sort({ order: 1, name: 1 })
+    .lean();
 };
 
 export const findById = async (id: string): Promise<iCategoria | null> => {

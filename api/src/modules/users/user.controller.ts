@@ -29,7 +29,7 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '4h' }
     )
 
-    return res.json({ success: true, token, data: { message: 'Bienvenido, Admin', token } })
+    return res.json({ success: true, data: { message: 'Bienvenido, Admin', token } })
   } catch (error) {
     return sendError(res, 'Error al intentar iniciar sesión', 500)
   }
