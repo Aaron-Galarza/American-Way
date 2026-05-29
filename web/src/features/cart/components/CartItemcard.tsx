@@ -15,15 +15,29 @@ interface CartItemCardProps {
 export const CartItemCard = ({ item, index }: CartItemCardProps) => {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
-  const updateItemAddon = useCartStore((state) => state.updateItemAddon); // <-- Nueva función importada
+  const updateItemAddon = useCartStore((state) => state.updateItemAddon);
   
-  // Estados para la animación y extras
+  // 1. Extraemos los datos PRIMERO
+  const { product, quantity, addons, itemTotal } = item;
+
+  // 2. Estados para la animación y extras
   const [isRemoving, setIsRemoving] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [showAllAddons, setShowAllAddons] = useState(false);
 
-  const { product, quantity, addons, itemTotal } = item;
+  // 👇 3. EL ANTÍDOTO DEFINITIVO: La Firma de ADN 🧬
+  // Creamos un string único con el ID del producto y sus adicionales exactos
+  const sortedAddons = [...addons].sort((a, b) => a.addon.id.localeCompare(b.addon.id));
+  const dataSignature = `${product.id}-${sortedAddons.map(a => `${a.addon.id}:${a.quantity}`).join('|')}`;
+  const [prevSignature, setPrevSignature] = useState(dataSignature);
+
+  // Si el ADN cambia (ej: el producto de abajo subió y ocupó este lugar), le sacamos la invisibilidad al instante
+  if (dataSignature !== prevSignature) {
+    setPrevSignature(dataSignature);
+    setIsRemoving(false);
+  }
+
   const apiBase = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api\/?$/, '');
   const imageSrc = product.image
     ? product.image.startsWith('http')
@@ -136,10 +150,6 @@ export const CartItemCard = ({ item, index }: CartItemCardProps) => {
           {formatPrice(itemTotal)}
         </span>
       </div>
-
-      {/* ============================================================== */}
-      {/* 👇 SECCIÓN NUEVA: REVELACIÓN PROGRESIVA DE EXTRAS 👇 */}
-      {/* ============================================================== */}
       
       {availableAddons.length > 0 && (
         <button 
@@ -164,7 +174,11 @@ export const CartItemCard = ({ item, index }: CartItemCardProps) => {
                 {/* Controles del Adicional Individual */}
                 <div className="flex items-center gap-2 rounded-lg bg-black/40 px-2 py-1">
                   <button 
-                    onClick={() => updateItemAddon(index, addon, -1)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      updateItemAddon(index, addon, -1);
+                    }}
                     className="p-1 text-white/50 hover:text-white transition-colors"
                   >
                     <Minus className="w-3 h-3" />
@@ -173,7 +187,11 @@ export const CartItemCard = ({ item, index }: CartItemCardProps) => {
                     {getAddonQty(addon.id)}
                   </span>
                   <button 
-                    onClick={() => updateItemAddon(index, addon, 1)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      updateItemAddon(index, addon, 1);
+                    }}
                     className="p-1 text-white/50 hover:text-white transition-colors"
                   >
                     <Plus className="w-3 h-3" />
