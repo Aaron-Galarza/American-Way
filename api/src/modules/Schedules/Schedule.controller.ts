@@ -36,14 +36,16 @@ export const updateDelivery = async (req: Request, res: Response) => {
 
 export const updateSchedule = async (req: Request, res: Response) => {
     try {
-        const { schedule, dailySchedule } = req.body
-        const nextSchedule = dailySchedule ?? schedule
+        const raw = req.body?.dailySchedule ?? req.body?.schedule ?? req.body
 
-        if (!Array.isArray(nextSchedule)) {
-            return sendError(res, 'El horario debe enviarse como array', 400)
+        // Accept a single day object or an array of days
+        const updates = Array.isArray(raw) ? raw : [raw]
+
+        if (!updates.length || !updates[0]?.day) {
+            return sendError(res, 'Debes enviar al menos un día con su configuración', 400)
         }
 
-        const config = await ConfigService.updateSchedule(nextSchedule)
+        const config = await ConfigService.updateSchedule(updates)
         return sendSucces(res, config)
     } catch (error) {
         return sendError(res, 'Error al actualizar los horarios')
