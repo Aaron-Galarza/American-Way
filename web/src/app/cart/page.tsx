@@ -69,13 +69,11 @@ export default function CartPage() {
 
           <div className="space-y-3">
             {items.map((item, index) => (
-              <CartItemCard
-                key={`${item.product.id}-${index}-${item.addons
-                  .map((a) => `${a.addon.id}:${a.quantity}`)
-                  .join("|")}`}
-                item={item}
-                index={index}
-              />
+           <CartItemCard
+  key={`${item.product.id}-${index}`}
+  item={item}
+  index={index}
+/>
             ))}
           </div>
         </section>
