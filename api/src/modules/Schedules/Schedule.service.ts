@@ -73,8 +73,25 @@ export const updateDelivery = async (pricePerKm: number): Promise<IConfig> => {
   return await config.save();
 };
 
-export const updateSchedule = async (dailySchedule: IDaySchedule[]): Promise<IConfig> => {
+export const updateSchedule = async (updates: IDaySchedule[]): Promise<IConfig> => {
   const config = await ConfigModel.getOrCreateConfig();
-  config.dailySchedule = dailySchedule;
+
+  // Index incoming updates by normalized day name for O(1) lookup
+  const updatesMap = new Map(updates.map(d => [normalizeDayName(d.day), d]));
+
+  // Replace matching days, keep the rest untouched
+  const merged = config.dailySchedule.map(existing =>
+    updatesMap.get(normalizeDayName(existing.day)) ?? existing
+  );
+
+  // Append days that don't exist yet in the schedule
+  for (const update of updates) {
+    const alreadyExists = config.dailySchedule.some(
+      d => normalizeDayName(d.day) === normalizeDayName(update.day)
+    );
+    if (!alreadyExists) merged.push(update);
+  }
+
+  config.dailySchedule = merged as typeof config.dailySchedule;
   return await config.save();
 };
