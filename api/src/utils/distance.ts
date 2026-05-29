@@ -10,30 +10,41 @@ const getStoreCoordinates = () => {
 
   return { storeLat, storeLng };
 };
-
 export const calculateDistanceKm = async (clientLat: number, clientLng: number): Promise<number> => {
   const token = process.env.MAPBOX_TOKEN;
   if (!token) {
     throw new AppError(500, 'Falta MAPBOX_TOKEN en el servidor');
   }
 
-  const { storeLat, storeLng } = getStoreCoordinates();
-  const url = new URL(
-    `https://api.mapbox.com/directions/v5/mapbox/driving/${storeLng},${storeLat};${clientLng},${clientLat}`,
-  );
+  // 1. Obtener coordenadas del local y limpiar cualquier espacio fantasma
+  const storeLatStr = String(process.env.STORE_LAT).trim();
+  const storeLngStr = String(process.env.STORE_LNG).trim();
+  
+  const clientLatStr = String(clientLat).trim();
+  const clientLngStr = String(clientLng).trim();
 
+  // 2. Construir la cadena de coordenadas de forma ultra limpia (LNG,LAT)
+  const pathCoordinates = `${storeLngStr},${storeLatStr};${clientLngStr},${clientLatStr}`;
+
+  // 3. Crear la URL base de Mapbox Directions
+  const baseUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${pathCoordinates}`;
+  const url = new URL(baseUrl);
+
+  // 4. Inyectar los parámetros de búsqueda de forma segura
   url.searchParams.set('access_token', token);
   url.searchParams.set('geometries', 'geojson');
-  url.searchParams.set('overview', 'false');
+  url.searchParams.set('overview', 'false'); // overview=false hace que devuelva solo el resumen de metros
 
   let response: Response;
   try {
-    response = await fetch(url);
+    response = await fetch(url.toString()); // Forzamos el parseo a string limpio
   } catch (error) {
     throw new AppError(503, 'No se pudo consultar el servicio de mapas');
   }
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[MAPBOX_API_ERROR]', errorText); // Dejamos registro en la consola del back
     throw new AppError(503, 'No se pudo calcular la distancia de envio');
   }
 
@@ -44,5 +55,6 @@ export const calculateDistanceKm = async (clientLat: number, clientLng: number):
     throw new AppError(400, 'No se encontro una ruta valida para esas coordenadas');
   }
 
+  // Convertir metros a KM y redondear a 2 decimales
   return Math.round((distanceMeters / 1000) * 100) / 100;
 };

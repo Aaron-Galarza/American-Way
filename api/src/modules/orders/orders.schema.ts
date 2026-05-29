@@ -17,8 +17,8 @@ const CartItemSchema = z.object({
 });
 
 const CoordinatesSchema = z.object({
-  lat: z.number({ message: 'lat debe ser un numero' }).min(-90).max(90),
-  lng: z.number({ message: 'lng debe ser un numero' }).min(-180).max(180),
+  lat: z.number({ message: 'La latitud debe ser un número' }).min(-90).max(90),
+  lng: z.number({ message: 'La longitud debe ser un número' }).min(-180).max(180),
 });
 
 export const createOrderSchema = z.object({
@@ -39,4 +39,15 @@ export const createOrderSchema = z.object({
     address: z.string().optional(),
     coordinates: CoordinatesSchema.optional(),
   }).optional(),
+}).superRefine((data, ctx) => {
+  
+  if (data.deliveryType === 'delivery') {
+    if (!data.delivery?.coordinates?.lat || !data.delivery?.coordinates?.lng) {
+      ctx.addIssue({
+        code: "custom",
+        message: 'Las coordenadas geográficas (lat y lng) son obligatorias para envíos a domicilio',
+        path: ['delivery', 'coordinates'],
+      });
+    }
+  }
 });

@@ -11,8 +11,8 @@ import { argDate, argToUTC } from '../../utils/Timezone'
 export const createOrder = async (orderData: any): Promise<iOrder> => {
  
   const storeStatus = await checkStoreStatus()
-  if (storeStatus.isClose || !storeStatus.isOpen) {
-    throw new Error(storeStatus.message || 'El negocio está cerrado en este momento')
+  if (!storeStatus.isOpen) {
+    throw new AppError(403, storeStatus.message || 'El negocio está cerrado en este momento')
   }
  
   const items: iCartItem[] = await Promise.all(
@@ -27,7 +27,7 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
           item.addons.map(async (a: any) => {
             const adicional = await AdicionalService.viewById(a.addonId)
             if (!adicional) throw new Error(`Adicional ${a.addonId} no encontrado`)
-            const addonName = adicional.name ?? adicional.title ?? 'Adicional'
+            const addonName = adicional.title ?? 'Adicional'
             return {
               addonId:  a.addonId,
               title:    addonName,
@@ -60,7 +60,7 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
   if (orderData.couponCode) {
     const coupon = await CouponService.search(orderData.couponCode)
     if (!coupon) throw new Error('El cupon ingresado no es valido')
-    discountPercent = coupon.Percent
+    discountPercent = coupon.discountPercent
     const discount = (subTotal * discountPercent) / 100
     total = subTotal - discount
   }
