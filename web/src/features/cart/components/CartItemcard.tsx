@@ -88,8 +88,8 @@ export const CartItemCard = ({ item, index }: CartItemCardProps) => {
             <img
               src={imageSrc}
               alt={product.title}
-              className="h-full w-full object-cover"
-              loading="lazy"
+              // 👇 ACÁ ESTÁ LA MAGIA: Chau loading="lazy", hola animate-in
+              className="h-full w-full object-cover animate-in fade-in duration-500"
               onError={() => setImageError(true)}
             />
           ) : (
